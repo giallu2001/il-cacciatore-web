@@ -1,26 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --verde-bosco: #2D4A22;
+  --oliva: #4A5C2A;
+  --oliva-chiaro: #6B7C3E;
+  --marrone: #6B4226;
+  --beige: #E8DCC8;
+  --sabbia: #F5F0E8;
+  --carbone: #1A1C18;
+  --oro: #C4922A;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--sabbia); color: var(--carbone); font-family: Inter, system-ui, sans-serif; }
+.font-display { font-family: 'Playfair Display', Georgia, serif; }
+
+.camo-bg {
+  background-color: #0f1a12;
+  background-image:
+    radial-gradient(ellipse 260px 160px at 12% 20%, rgba(45,74,34,.75), transparent 70%),
+    radial-gradient(ellipse 300px 180px at 38% 65%, rgba(58,89,40,.55), transparent 65%),
+    radial-gradient(ellipse 280px 180px at 72% 30%, rgba(42,68,32,.65), transparent 70%),
+    radial-gradient(ellipse 190px 130px at 88% 70%, rgba(50,78,37,.55), transparent 65%),
+    radial-gradient(ellipse 180px 120px at 25% 45%, rgba(90,56,32,.55), transparent 65%),
+    radial-gradient(ellipse 150px 110px at 60% 55%, rgba(78,48,24,.45), transparent 60%),
+    linear-gradient(160deg, rgba(8,12,8,.55), rgba(8,12,8,.88));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+.card { background: #FDFAF5; border: 1px solid #DDD4C0; box-shadow: 0 4px 16px rgba(26,28,24,.08); }
+.card:hover { box-shadow: 0 8px 28px rgba(26,28,24,.16); transform: translateY(-3px); }
+.scrollbar-thin::-webkit-scrollbar { height: 10px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: #E8DCC8; border-radius: 999px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #6B7C3E; border-radius: 999px; }
