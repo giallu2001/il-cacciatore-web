@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -13,24 +13,20 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--sabbia); color: var(--carbone); font-family: Inter, system-ui, sans-serif; }
 .font-display { font-family: 'Playfair Display', Georgia, serif; }
-
+.card { background: #FDFAF5; border: 1px solid #DDD4C0; box-shadow: 0 1px 3px rgba(26,28,24,.07), 0 4px 12px rgba(26,28,24,.06); }
+.card:hover { box-shadow: 0 4px 20px rgba(26,28,24,.14); transform: translateY(-2px); }
 .camo-bg {
   background-color: #0f1a12;
   background-image:
-    radial-gradient(ellipse 260px 160px at 12% 20%, rgba(45,74,34,.75), transparent 70%),
-    radial-gradient(ellipse 300px 180px at 38% 65%, rgba(58,89,40,.55), transparent 65%),
-    radial-gradient(ellipse 280px 180px at 72% 30%, rgba(42,68,32,.65), transparent 70%),
-    radial-gradient(ellipse 190px 130px at 88% 70%, rgba(50,78,37,.55), transparent 65%),
-    radial-gradient(ellipse 180px 120px at 25% 45%, rgba(90,56,32,.55), transparent 65%),
-    radial-gradient(ellipse 150px 110px at 60% 55%, rgba(78,48,24,.45), transparent 60%),
-    linear-gradient(160deg, rgba(8,12,8,.55), rgba(8,12,8,.88));
+    radial-gradient(ellipse 280px 160px at 15% 22%, rgba(45,74,34,.75), transparent 70%),
+    radial-gradient(ellipse 350px 200px at 85% 25%, rgba(74,92,42,.55), transparent 70%),
+    radial-gradient(ellipse 260px 180px at 55% 78%, rgba(107,66,38,.42), transparent 70%),
+    linear-gradient(160deg, rgba(10,14,8,.55), rgba(10,14,8,.9));
 }
-
-.card { background: #FDFAF5; border: 1px solid #DDD4C0; box-shadow: 0 4px 16px rgba(26,28,24,.08); }
-.card:hover { box-shadow: 0 8px 28px rgba(26,28,24,.16); transform: translateY(-3px); }
-.scrollbar-thin::-webkit-scrollbar { height: 10px; }
-.scrollbar-thin::-webkit-scrollbar-track { background: #E8DCC8; border-radius: 999px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: #6B7C3E; border-radius: 999px; }
+.input { width: 100%; border-radius: .65rem; border: 1px solid #d7cbb6; background: #fff; padding: .9rem 1rem; color: #1A1C18; outline: none; }
+.input:focus { border-color: #4A5C2A; box-shadow: 0 0 0 3px rgba(74,92,42,.15); }
+.btn-primary { border-radius: .65rem; background: #4A5C2A; padding: .9rem 1.25rem; font-weight: 800; color: white; }
+.btn-primary:hover { background: #6B7C3E; }
+.btn-gold { border-radius: .65rem; background: #C4922A; padding: .9rem 1.25rem; font-weight: 800; color: #1A1C18; }

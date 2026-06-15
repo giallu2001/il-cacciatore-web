@@ -1,25 +1,10 @@
-export default function Page() {
-  return (
-    <main className="min-h-screen bg-[#F5F0E8] text-[#1A1C18]">
-      <nav className="bg-[#151914] px-6 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-display text-2xl font-bold">🦆 Il Cacciatore</a>
-          <a href="/" className="rounded-md border border-white/20 px-4 py-2 text-sm">Torna alla Home</a>
-        </div>
-      </nav>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-[#DDD4C0] bg-[#FDFAF5] p-10 shadow-xl">
-          <div className="text-5xl">📰</div>
-          <h1 className="font-display mt-6 text-5xl font-black">News</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#3D3F38]">Aggiornamenti su caccia, calendari, ATC, normative e territorio.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="Regione / Comune" />
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="ATC / Specie / Documento" />
-            <button className="rounded-xl bg-[#2D4A22] px-5 py-3 font-bold text-white">Leggi news</button>
-          </div>
-          <p className="mt-6 text-sm text-[#7A7D72]">Pagina MVP funzionante: nel prossimo step colleghiamo Supabase, database e dati reali.</p>
-        </div>
-      </section>
-    </main>
-  );
-}
+"use client";
+import { useEffect,useMemo,useState } from "react"; import { supabase } from "@/lib/supabase"; import { PageShell,cardClass,inputClass,buttonClass } from "@/components/PageShell";
+type News={id:string;title:string;category:string|null;region:string|null;summary:string|null;source_url:string|null;image_url:string|null}; type Source={id:string;name:string;source_type:string;region:string|null;url:string|null};
+export default function NewsPage(){const [news,setNews]=useState<News[]>([]),[sources,setSources]=useState<Source[]>([]),[filters,setFilters]=useState({q:"",category:"",source:"",area:""}); useEffect(()=>{async function load(){const {data:n}=await supabase.from("news_articles").select("*").order("published_at",{ascending:false}).limit(300); const {data:s}=await supabase.from("content_sources").select("*").order("name",{ascending:true}).limit(500); setNews((n??[]) as News[]); setSources((s??[]) as Source[])} load()},[]);
+const fn=useMemo(()=>{const q=filters.q.toLowerCase(),c=filters.category.toLowerCase(),a=filters.area.toLowerCase(); return news.filter(n=>{const text=`${n.title} ${n.summary??""} ${n.category??""} ${n.region??""}`.toLowerCase(); return (!q||text.includes(q))&&(!c||(n.category??"").toLowerCase().includes(c))&&(!a||(n.region??"").toLowerCase().includes(a))})},[news,filters]);
+const fs=useMemo(()=>{const q=filters.q.toLowerCase(),c=filters.category.toLowerCase(),s=filters.source.toLowerCase(); return sources.filter(src=>{const text=`${src.name} ${src.source_type} ${src.region??""}`.toLowerCase(); return (!q||text.includes(q))&&(!c||src.source_type.toLowerCase().includes(c))&&(!s||src.name.toLowerCase().includes(s))})},[sources,filters]);
+return <PageShell eyebrow="News H24" title="Notizie venatorie, armi, ATC, cinofilia e federazioni" subtitle="Fonti monitorate e aggiornate automaticamente ogni giorno da fonti gratuite, RSS e siti ufficiali.">
+ <div className={cardClass}><div className="grid gap-3 md:grid-cols-5"><input className={inputClass} placeholder="Parola chiave" onChange={e=>setFilters({...filters,q:e.target.value})}/><input className={inputClass} placeholder="Categoria" onChange={e=>setFilters({...filters,category:e.target.value})}/><input className={inputClass} placeholder="Fonte" onChange={e=>setFilters({...filters,source:e.target.value})}/><input className={inputClass} placeholder="Regione / ATC" onChange={e=>setFilters({...filters,area:e.target.value})}/><button className={buttonClass}>Cerca</button></div></div>
+ <h2 className="mt-8 text-3xl font-black">News e collegamenti rapidi</h2><div className="mt-4 grid gap-5 md:grid-cols-3">{fn.map(n=><article key={n.id} className={cardClass}>{n.image_url&&<img src={n.image_url} alt={n.title} className="mb-5 h-40 w-full rounded-xl object-cover"/>}<p className="text-xs font-black uppercase tracking-[.2em] text-[#C4922A]">{n.category||"News"}</p><h3 className="mt-2 text-2xl font-black">{n.title}</h3>{n.summary&&<p className="mt-3 text-[#3D3F38]">{n.summary}</p>}{n.source_url&&<a className="mt-5 inline-block rounded-md bg-[#4A5C2A] px-4 py-2 text-sm font-bold text-white" href={n.source_url} target="_blank">Leggi fonte</a>}</article>)}</div>
+ <h2 className="mt-8 text-3xl font-black">Fonti monitorate</h2><div className="mt-4 grid gap-5 md:grid-cols-4">{fs.map(s=><article key={s.id} className={cardClass}><p className="text-xs font-black uppercase tracking-[.2em] text-[#C4922A]">{s.source_type}</p><h3 className="mt-2 text-xl font-black">{s.name}</h3><p className="mt-2 text-sm text-[#3D3F38]">{s.region||"Italia / internazionale"}</p>{s.url&&<a className="mt-5 inline-block font-bold text-[#2D4A22]" href={s.url} target="_blank">Apri sito →</a>}</article>)}</div></PageShell>}

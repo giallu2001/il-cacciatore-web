@@ -1,25 +1,31 @@
-export default function Page() {
+
+const shellClass = "min-h-screen bg-[#F5F0E8] px-6 py-10 text-[#1A1C18]";
+const cardClass = "rounded-2xl border border-[#DDD4C0] bg-white p-6 shadow-sm";
+const btnClass = "inline-flex rounded-md bg-[#4A5C2A] px-4 py-2 text-sm font-bold text-white hover:bg-[#6B7C3E]";
+
+function PageHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <main className="min-h-screen bg-[#F5F0E8] text-[#1A1C18]">
-      <nav className="bg-[#151914] px-6 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-display text-2xl font-bold">🦆 Il Cacciatore</a>
-          <a href="/" className="rounded-md border border-white/20 px-4 py-2 text-sm">Torna alla Home</a>
+    <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div>
+        <a href="/" className="mb-6 inline-block font-bold text-[#2D4A22]">← Home</a>
+        <p className="text-xs font-black uppercase tracking-[.25em] text-[#2D4A22]">{eyebrow}</p>
+        <h1 className="mt-2 text-4xl font-black md:text-5xl">{title}</h1>
+        <p className="mt-3 max-w-3xl text-[#3D3F38]">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+export default function CarrelloPage() {
+  return (
+    <main className={shellClass}>
+      <div className="mx-auto max-w-4xl">
+        <PageHeader eyebrow="Carrello" title="Carrello store" subtitle="Quando collegheremo Shopify, il checkout passerà direttamente dal tuo store." />
+        <div className={cardClass}>
+          <p>Il carrello locale è dimostrativo. Shopify verrà collegato nella fase store.</p>
+          <a className="mt-5 inline-block rounded-md bg-[#4A5C2A] px-4 py-2 font-bold text-white" href="/store">Torna allo store</a>
         </div>
-      </nav>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-[#DDD4C0] bg-[#FDFAF5] p-10 shadow-xl">
-          <div className="text-5xl">🛒</div>
-          <h1 className="font-display mt-6 text-5xl font-black">Carrello</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#3D3F38]">Qui arriveranno i prodotti selezionati dallo store.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="Regione / Comune" />
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="ATC / Specie / Documento" />
-            <button className="rounded-xl bg-[#2D4A22] px-5 py-3 font-bold text-white">Procedi</button>
-          </div>
-          <p className="mt-6 text-sm text-[#7A7D72]">Pagina MVP funzionante: nel prossimo step colleghiamo Supabase, database e dati reali.</p>
-        </div>
-      </section>
+      </div>
     </main>
   );
 }

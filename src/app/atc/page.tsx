@@ -1,25 +1,16 @@
-export default function Page() {
-  return (
-    <main className="min-h-screen bg-[#F5F0E8] text-[#1A1C18]">
-      <nav className="bg-[#151914] px-6 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-display text-2xl font-bold">🦆 Il Cacciatore</a>
-          <a href="/" className="rounded-md border border-white/20 px-4 py-2 text-sm">Torna alla Home</a>
-        </div>
-      </nav>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-[#DDD4C0] bg-[#FDFAF5] p-10 shadow-xl">
-          <div className="text-5xl">📍</div>
-          <h1 className="font-display mt-6 text-5xl font-black">ATC Italia</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#3D3F38]">Elenco Ambiti Territoriali di Caccia con schede, comuni e documenti.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="Regione / Comune" />
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="ATC / Specie / Documento" />
-            <button className="rounded-xl bg-[#2D4A22] px-5 py-3 font-bold text-white">Trova ATC</button>
-          </div>
-          <p className="mt-6 text-sm text-[#7A7D72]">Pagina MVP funzionante: nel prossimo step colleghiamo Supabase, database e dati reali.</p>
-        </div>
-      </section>
-    </main>
-  );
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { PageShell, cardClass, inputClass, buttonClass } from "@/components/PageShell";
+type Atc={id:string;code:string;name:string;region:string|null;province:string|null;municipalities:string|null;website_url:string|null;documents_url:string|null};
+type Profile={region:string|null;atc:string|null;primary_atc:string|null;secondary_atcs:string[]|null};
+export default function AtcPage(){
+ const [atcs,setAtcs]=useState<Atc[]>([]); const [profile,setProfile]=useState<Profile|null>(null); const [filters,setFilters]=useState({region:"",province:"",municipality:"",code:""});
+ useEffect(()=>{async function load(){const {data}=await supabase.from("atc_areas").select("*").order("region",{ascending:true}).limit(2000); setAtcs((data??[]) as Atc[]); const {data:{user}}=await supabase.auth.getUser(); if(user){const {data:p}=await supabase.from("profiles").select("region,atc,primary_atc,secondary_atcs").eq("id",user.id).single(); setProfile(p as Profile|null)}} load()},[]);
+ const prefReg=profile?.region?.toLowerCase()??""; const prefAtcs=[profile?.primary_atc,profile?.atc,...(profile?.secondary_atcs??[])].filter(Boolean).map(x=>String(x).toLowerCase());
+ const filtered=useMemo(()=>{const r=filters.region.toLowerCase(),p=filters.province.toLowerCase(),m=filters.municipality.toLowerCase(),c=filters.code.toLowerCase(); return atcs.filter(a=>(!r||(a.region??"").toLowerCase().includes(r))&&(!p||(a.province??"").toLowerCase().includes(p))&&(!m||(a.municipalities??"").toLowerCase().includes(m))&&(!c||`${a.code} ${a.name}`.toLowerCase().includes(c))).sort((x,y)=>score(y)-score(x)); function score(a:Atc){let s=0; const reg=(a.region??"").toLowerCase(), code=(a.code??"").toLowerCase(); if(prefReg&&reg.includes(prefReg))s+=50; if(prefAtcs.some(p=>code.includes(p)||p.includes(code)))s+=100; return s;}},[atcs,filters,prefReg,prefAtcs]);
+ return <PageShell eyebrow="ATC Italia" title="Ricerca Ambiti Territoriali di Caccia" subtitle="In cima trovi ATC principale e secondari del profilo. Gli ATC senza sito li completiamo insieme.">
+  <div className={cardClass}><div className="grid gap-3 md:grid-cols-5"><input className={inputClass} placeholder="Regione" onChange={e=>setFilters({...filters,region:e.target.value})}/><input className={inputClass} placeholder="Provincia" onChange={e=>setFilters({...filters,province:e.target.value})}/><input className={inputClass} placeholder="Comune" onChange={e=>setFilters({...filters,municipality:e.target.value})}/><input className={inputClass} placeholder="Codice ATC" onChange={e=>setFilters({...filters,code:e.target.value})}/><button className={buttonClass}>Risultati: {filtered.length}</button></div></div>
+  <div className="mt-6 grid gap-5 md:grid-cols-3">{filtered.map(a=><article key={a.id} className={cardClass}><p className="text-xs font-black uppercase tracking-[.2em] text-[#C4922A]">{a.code}</p><h2 className="mt-2 text-2xl font-black">{a.name}</h2><p className="mt-3"><b>Regione:</b> {a.region}</p><p><b>Provincia:</b> {a.province}</p><p className="mt-2 text-sm leading-6 text-[#3D3F38]">{a.municipalities}</p><div className="mt-5 flex flex-wrap gap-3">{a.website_url?<a className="rounded-md bg-[#4A5C2A] px-4 py-2 text-sm font-bold text-white" href={a.website_url} target="_blank">Sito ufficiale</a>:<span className="rounded-md bg-[#E8DCC8] px-4 py-2 text-sm font-bold">Sito da completare</span>}{a.documents_url&&<a className="rounded-md border border-[#DDD4C0] px-4 py-2 text-sm font-bold text-[#2D4A22]" href={a.documents_url} target="_blank">Documenti</a>}</div></article>)}</div>
+ </PageShell>
 }

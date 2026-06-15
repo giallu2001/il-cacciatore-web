@@ -1,25 +1,108 @@
-export default function Page() {
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { PageShell, cardClass, inputClass, buttonClass } from "@/components/PageShell";
+
+type HuntingDay = {
+  id: string;
+  region: string;
+  atc_code: string | null;
+  date: string;
+  sunrise_time: string | null;
+  sunset_time: string | null;
+  hunting_start_time: string | null;
+  hunting_end_time: string | null;
+  day_length: string | null;
+  notes: string | null;
+};
+
+export default function CalendarioPage() {
+  const [days, setDays] = useState<HuntingDay[]>([]);
+  const [filters, setFilters] = useState({ region: "Toscana", atc: "PI 14", month: "" });
+
+  useEffect(() => {
+    supabase
+      .from("hunting_day_times")
+      .select("*")
+      .order("date", { ascending: true })
+      .limit(1200)
+      .then(({ data }) => setDays((data ?? []) as HuntingDay[]));
+  }, []);
+
+  const filtered = useMemo(() => {
+    const r = filters.region.toLowerCase().trim();
+    const a = filters.atc.toLowerCase().replace(/\s+/g, "");
+    const m = filters.month;
+
+    const unique = new Map<string, HuntingDay>();
+    for (const d of days) {
+      const key = `${d.region}|${d.atc_code || ""}|${d.date}`;
+      if (!unique.has(key)) unique.set(key, d);
+    }
+
+    return Array.from(unique.values()).filter((d) => {
+      const dayAtc = (d.atc_code ?? "").toLowerCase().replace(/\s+/g, "");
+      return (!r || d.region.toLowerCase().includes(r)) &&
+        (!a || dayAtc.includes(a) || a.includes(dayAtc)) &&
+        (!m || d.date.startsWith(m));
+    });
+  }, [days, filters]);
+
   return (
-    <main className="min-h-screen bg-[#F5F0E8] text-[#1A1C18]">
-      <nav className="bg-[#151914] px-6 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-display text-2xl font-bold">🦆 Il Cacciatore</a>
-          <a href="/" className="rounded-md border border-white/20 px-4 py-2 text-sm">Torna alla Home</a>
+    <PageShell
+      eyebrow="Calendario giornate"
+      title="Orari di caccia e durata delle giornate"
+      subtitle="Alba, tramonto, inizio/fine attività venatoria e durata indicativa della giornata. Verifica sempre calendario ufficiale, comune e disposizioni ATC."
+    >
+      <div className={cardClass}>
+        <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_160px_170px]">
+          <input className={inputClass} value={filters.region} placeholder="Regione" onChange={(e) => setFilters({ ...filters, region: e.target.value })} />
+          <input className={inputClass} value={filters.atc} placeholder="ATC" onChange={(e) => setFilters({ ...filters, atc: e.target.value })} />
+          <input className={inputClass} type="month" onChange={(e) => setFilters({ ...filters, month: e.target.value })} />
+          <button className={buttonClass} type="button">Risultati: {filtered.length}</button>
+          <a className="rounded-lg border border-[#DDD4C0] px-5 py-3 text-center font-bold text-[#2D4A22]" href="/carniere">Vai al carniere →</a>
         </div>
-      </nav>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-[#DDD4C0] bg-[#FDFAF5] p-10 shadow-xl">
-          <div className="text-5xl">📅</div>
-          <h1 className="font-display mt-6 text-5xl font-black">Calendario Venatorio</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#3D3F38]">Filtra calendario per regione, ATC, specie e data.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="Regione / Comune" />
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="ATC / Specie / Documento" />
-            <button className="rounded-xl bg-[#2D4A22] px-5 py-3 font-bold text-white">Verifica periodo di caccia</button>
+      </div>
+
+      <div className="mt-6 overflow-hidden rounded-2xl border border-[#DDD4C0] bg-white shadow-sm">
+        <div className="hidden grid-cols-[170px_110px_140px_140px_110px_120px_1fr] bg-[#1A211A] px-5 py-4 text-xs font-black uppercase tracking-[.14em] text-white md:grid">
+          <span>Data</span>
+          <span>Alba</span>
+          <span>Inizio</span>
+          <span>Fine</span>
+          <span>Tramonto</span>
+          <span>Durata</span>
+          <span>Note</span>
+        </div>
+
+        {filtered.length === 0 && <div className="p-6">Nessun orario inserito. Esegui il nuovo SQL.</div>}
+
+        {filtered.map((d) => (
+          <div key={`${d.region}-${d.atc_code}-${d.date}`} className="grid gap-3 border-t border-[#EEE4D3] px-5 py-4 text-sm md:grid-cols-[170px_110px_140px_140px_110px_120px_1fr] md:items-center">
+            <b>{formatDate(d.date)}</b>
+            <Field label="Alba" value={d.sunrise_time || "-"} />
+            <Field label="Inizio" value={d.hunting_start_time || "-"} />
+            <Field label="Fine" value={d.hunting_end_time || "-"} />
+            <Field label="Tramonto" value={d.sunset_time || "-"} />
+            <Field label="Durata" value={d.day_length || "-"} />
+            <span className="text-xs leading-5 text-[#3D3F38]">{d.notes || "Verifica fonte ufficiale."}</span>
           </div>
-          <p className="mt-6 text-sm text-[#7A7D72]">Pagina MVP funzionante: nel prossimo step colleghiamo Supabase, database e dati reali.</p>
-        </div>
-      </section>
-    </main>
+        ))}
+      </div>
+    </PageShell>
   );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <span>
+      <small className="mr-2 font-bold uppercase text-[#6B4226] md:hidden">{label}:</small>
+      {value}
+    </span>
+  );
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat("it-IT", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(`${date}T12:00:00`));
 }

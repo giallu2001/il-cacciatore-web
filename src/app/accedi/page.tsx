@@ -1,25 +1,60 @@
-export default function Page() {
+"use client";
+
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+export default function AccediPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") || "");
+    const password = String(form.get("password") || "");
+
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (loginError) {
+      setError(loginError.message);
+      setLoading(false);
+      return;
+    }
+
+    router.push("/profilo");
+    router.refresh();
+  }
+
   return (
-    <main className="min-h-screen bg-[#F5F0E8] text-[#1A1C18]">
-      <nav className="bg-[#151914] px-6 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-display text-2xl font-bold">🦆 Il Cacciatore</a>
-          <a href="/" className="rounded-md border border-white/20 px-4 py-2 text-sm">Torna alla Home</a>
-        </div>
-      </nav>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-[#DDD4C0] bg-[#FDFAF5] p-10 shadow-xl">
-          <div className="text-5xl">🔐</div>
-          <h1 className="font-display mt-6 text-5xl font-black">Accedi</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#3D3F38]">Accesso futuro con Supabase Auth.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="Regione / Comune" />
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="ATC / Specie / Documento" />
-            <button className="rounded-xl bg-[#2D4A22] px-5 py-3 font-bold text-white">Accedi</button>
-          </div>
-          <p className="mt-6 text-sm text-[#7A7D72]">Pagina MVP funzionante: nel prossimo step colleghiamo Supabase, database e dati reali.</p>
-        </div>
-      </section>
+    <main className="min-h-screen bg-[#0f1a12] px-6 py-16 text-white">
+      <div className="mx-auto max-w-md rounded-2xl border border-white/10 bg-white/[.04] p-8">
+        <Link href="/" className="text-sm text-[#C4922A]">← Torna alla home</Link>
+        <h1 className="mt-6 text-4xl font-black">Accedi</h1>
+        <p className="mt-2 text-white/60">Entra nella tua area personale.</p>
+
+        <form onSubmit={handleLogin} className="mt-8 grid gap-4">
+          <input name="email" required type="email" placeholder="Email" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+          <input name="password" required type="password" placeholder="Password" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+          <button disabled={loading} className="rounded-lg bg-[#4A5C2A] px-5 py-3 font-bold hover:bg-[#6B7C3E] disabled:opacity-60">
+            {loading ? "Accesso..." : "Accedi"}
+          </button>
+        </form>
+
+        {error && <p className="mt-4 rounded-lg bg-red-500/15 p-3 text-red-200">{error}</p>}
+
+        <p className="mt-6 text-sm text-white/55">
+          Non hai un account? <Link className="text-[#C4922A]" href="/registrati">Registrati</Link>
+        </p>
+      </div>
     </main>
   );
 }

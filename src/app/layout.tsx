@@ -3,10 +3,21 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Il Cacciatore — Portale venatorio italiano",
-  description: "Calendari venatori, normative, ATC, meteo, store e scadenze per cacciatori italiani.",
+  description: "Portale venatorio italiano con calendario, carniere, ATC, meteo, specie, news e documenti.",
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+    ],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="it">
       <body>{children}</body>

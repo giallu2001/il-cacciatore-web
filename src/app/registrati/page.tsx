@@ -1,25 +1,104 @@
-export default function Page() {
+"use client";
+
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+
+export default function RegistratiPage() {
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  async function handleRegister(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
+
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") || "");
+    const password = String(form.get("password") || "");
+    const firstName = String(form.get("first_name") || "");
+    const lastName = String(form.get("last_name") || "");
+    const region = String(form.get("region") || "");
+    const province = String(form.get("province") || "");
+    const municipality = String(form.get("municipality") || "");
+    const atc = String(form.get("atc") || "");
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          region,
+          province,
+          municipality,
+          atc,
+        },
+      },
+    });
+
+    if (signUpError) {
+      setError(signUpError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data.user) {
+      await supabase.from("profiles").upsert({
+        id: data.user.id,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        region,
+        province,
+        municipality,
+        atc,
+      });
+    }
+
+    setMessage("Registrazione completata. Controlla la tua email per confermare l'account.");
+    setLoading(false);
+  }
+
   return (
-    <main className="min-h-screen bg-[#F5F0E8] text-[#1A1C18]">
-      <nav className="bg-[#151914] px-6 py-4 text-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a href="/" className="font-display text-2xl font-bold">🦆 Il Cacciatore</a>
-          <a href="/" className="rounded-md border border-white/20 px-4 py-2 text-sm">Torna alla Home</a>
-        </div>
-      </nav>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-[#DDD4C0] bg-[#FDFAF5] p-10 shadow-xl">
-          <div className="text-5xl">🦆</div>
-          <h1 className="font-display mt-6 text-5xl font-black">Registrati</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-[#3D3F38]">Crea il profilo cacciatore e abilita scadenze, ATC e notifiche.</p>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="Regione / Comune" />
-            <input className="rounded-xl border border-[#DDD4C0] px-4 py-3" placeholder="ATC / Specie / Documento" />
-            <button className="rounded-xl bg-[#2D4A22] px-5 py-3 font-bold text-white">Crea account</button>
+    <main className="min-h-screen bg-[#0f1a12] px-6 py-16 text-white">
+      <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-white/[.04] p-8">
+        <Link href="/" className="text-sm text-[#C4922A]">← Torna alla home</Link>
+        <h1 className="mt-6 text-4xl font-black">Crea il tuo profilo</h1>
+        <p className="mt-2 text-white/60">Regione, comune e ATC serviranno per personalizzare calendari, scadenze e notifiche.</p>
+
+        <form onSubmit={handleRegister} className="mt-8 grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <input name="first_name" required placeholder="Nome" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+            <input name="last_name" required placeholder="Cognome" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
           </div>
-          <p className="mt-6 text-sm text-[#7A7D72]">Pagina MVP funzionante: nel prossimo step colleghiamo Supabase, database e dati reali.</p>
-        </div>
-      </section>
+          <input name="email" required type="email" placeholder="Email" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+          <input name="password" required type="password" minLength={6} placeholder="Password min. 6 caratteri" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <input name="region" placeholder="Regione" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+            <input name="province" placeholder="Provincia" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <input name="municipality" placeholder="Comune" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+            <input name="atc" placeholder="ATC" className="rounded-lg bg-white px-4 py-3 text-black outline-none" />
+          </div>
+
+          <button disabled={loading} className="rounded-lg bg-[#4A5C2A] px-5 py-3 font-bold hover:bg-[#6B7C3E] disabled:opacity-60">
+            {loading ? "Registrazione..." : "Registrati"}
+          </button>
+        </form>
+
+        {message && <p className="mt-4 rounded-lg bg-green-500/15 p-3 text-green-200">{message}</p>}
+        {error && <p className="mt-4 rounded-lg bg-red-500/15 p-3 text-red-200">{error}</p>}
+
+        <p className="mt-6 text-sm text-white/55">
+          Hai già un account? <Link className="text-[#C4922A]" href="/accedi">Accedi</Link>
+        </p>
+      </div>
     </main>
   );
 }
