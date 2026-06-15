@@ -548,7 +548,7 @@ function SourcesPanel({
               <tr key={s.id} className="border-b align-top">
                 <td className="p-3">
                   <b>{s.name}</b>
-                  <p className="mt-1 max-w-[320px] truncate text-xs text-[#3D3F38]">{s.rss_url || s.site_url || s.url}</p>
+                  <p className="mt-1 max-w-[320px] truncate text-xs text-[#3D3F38]">{s.rss_url || s.site_url || ""}</p>
                 </td>
                 <td className="p-3">{s.source_type || "-"}</td><td className="p-3">{s.section || "news"}</td>
                 <td className="p-3">{s.category || "News"}</td>
